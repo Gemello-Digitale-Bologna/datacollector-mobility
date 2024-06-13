@@ -96,7 +96,7 @@ spec:
   - url: src/download-spire.py
     name: download-traffic-spire
     kind: job
-    image: python:3.9
+    image: mlrun/mlrun
     handler: get_spire
   workflows:
   - path: ./src/mobility-data-pipeline.py

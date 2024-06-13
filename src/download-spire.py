@@ -65,7 +65,12 @@ def process_file(service, item_id, item_name):
         while not done:
             status, done = downloader.next_chunk()
 
-    data = datetime.datetime.strptime(item_name, 'FLUSSI%Y%m%d.txt')
+    try:
+        data = datetime.datetime.strptime(item_name, 'FLUSSI%Y%m%d.txt')
+    except Exception as e:
+        print(f"Error: unknown file : {item_name}")
+        return
+    
     f = open(f"myfile", "r")
     sensor = None
     entries = []
@@ -136,6 +141,9 @@ def process_all(context, query: str, s3, bucket: str, destination_path: str):
             results = request.execute()
             years = results.get("files", [])
             for year in years:
+                # if year["name"] == "2024":
+                #     continue
+                    
                 process_folder(service, year)
                 rdf = pd.DataFrame()
                 for i in range(1, 13):
@@ -151,6 +159,11 @@ def process_all(context, query: str, s3, bucket: str, destination_path: str):
             
 @mlrun.handler()
 def get_spire(context):
+    base_folder = './data'
+        
+    if not os.path.exists(base_folder):
+        os.makedirs(base_folder)
+
     s3 = boto3.client('s3',
                 endpoint_url=os.environ.get('S3_ENDPOINT_URL'),
                 aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
