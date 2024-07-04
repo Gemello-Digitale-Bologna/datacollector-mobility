@@ -51,3 +51,40 @@ def download_road_nodes(context):
 def download_city_30(context):
     data = download_geo(context, "velocita-citta-30", "city_30")
     # return data
+
+@mlrun.handler()
+def download_charging_stations(context):
+    data = download_geo(context, "colonnine-elettriche", "charging_stations")
+    # return data
+
+@mlrun.handler()
+def download_bike_path(context):
+    data = download_geo(context, "piste-ciclopedonali", "bike_path")
+    # return data
+
+@mlrun.handler()
+def download_incidents(context):
+    data = download_geo(context, "incidenti_new", "car_incidents")
+    # return data
+
+@mlrun.handler()
+def download_bike_parking_places(context):
+    data = download_geo(context, "rastrelliere-per-biciclette", "bike_parking_places")
+    # return data
+
+@mlrun.handler()
+def download_car_parkings(context):
+    data = download_geo(context, "parcheggi", "car_parkings")
+    # return data
+
+@mlrun.handler()
+def download_bus_stops_tper(context):
+    data = download_geo(context, "tper-fermate-autobus", "tper_bus_stops")
+    # return data
+
+@mlrun.handler()
+def download_train_stops_tper(context):
+    data = download_geo(context, "stazioniferroviarie_20210401", "tper_train_stops")
+    # return data
+
+    

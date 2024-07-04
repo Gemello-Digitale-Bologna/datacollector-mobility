@@ -98,6 +98,60 @@ spec:
     kind: job
     image: mlrun/mlrun
     handler: get_spire
+  - url: src/download-open-data.py
+    name: download-charging-stations
+    kind: job
+    image: mlrun/mlrun
+    handler: download_charging_stations
+    requirements:
+    - geopandas==0.13.2
+  - url: src/download-open-data.py
+    name: download-bike-path
+    kind: job
+    image: mlrun/mlrun
+    handler: download_bike_path
+    requirements:
+    - geopandas==0.13.2
+  - url: src/download-open-data.py
+    name: download-incidents
+    kind: job
+    image: mlrun/mlrun
+    handler: download_incidents
+    requirements:
+    - geopandas==0.13.2
+  - url: src/download-open-data.py
+    name: download-bike-parking-places
+    kind: job
+    image: mlrun/mlrun
+    handler: download_bike_parking_places
+    requirements:
+    - geopandas==0.13.2
+  - url: src/download-open-data.py
+    name: download-car-parkings
+    kind: job
+    image: mlrun/mlrun
+    handler: download_car_parkings
+    requirements:
+    - geopandas==0.13.2
+  - url: src/download-open-data.py
+    name: download-bus-stops-tper
+    kind: job
+    image: mlrun/mlrun
+    handler: download_bus_stops_tper
+    requirements:
+    - geopandas==0.13.2
+  - url: src/download-open-data.py
+    name: download-train-stops-tper
+    kind: job
+    image: mlrun/mlrun
+    handler: download_train_stops_tper
+    requirements:
+    - geopandas==0.13.2
+  - url: src/download-spire.py
+    name: download-traffic-spire-accuracy
+    kind: job
+    image: mlrun/mlrun
+    handler: get_spire_accur
   workflows:
   - path: ./src/mobility-data-pipeline.py
     name: mobility-data-pipeline

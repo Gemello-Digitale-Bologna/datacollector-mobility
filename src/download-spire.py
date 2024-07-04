@@ -85,7 +85,7 @@ def process_file(context, service, item_id, item_name, date_extractor):
             status, done = downloader.next_chunk()
 
     data = date_extractor(item_name)
-    if data == None
+    if data == None:
         context.logger.error(f"Error: unknown file : {item_name}")
         return
     
@@ -203,4 +203,4 @@ def get_spire_accur(context):
                 aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
 
 
-    process_all(context, "mimeType='application/vnd.google-apps.folder' and name='Diagnostica'", s3, "dataspace", "mobility-data/trafic-spire-accur", extract_date_flussi)
+    process_all(context, "mimeType='application/vnd.google-apps.folder' and name='Diagnostica'", s3, "dataspace", "mobility-data/trafic-spire-accur", extract_date_accuracy)

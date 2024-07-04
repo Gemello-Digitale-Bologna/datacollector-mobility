@@ -33,7 +33,14 @@ def share_files(context, bucket: str = "dataspace", path: str = "mobility"):
         "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-road-nodes/0/rifter_nodes.parquet": None,
         "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-curves/0/ctm_level_curves_10m.parquet": None,
         "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-sidewalks/0/ctm_level_sidewalks.parquet": None,
-        "s3://datalake/projects/mobility-data/artifacts/download-city30-download-city-30/0/city_30.parquet": None,
+        "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-city30/0/city_30.parquet": None,
+        "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-charging-stations/0/charging_stations.parquet": None,
+        "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-bike-path/0/bike_path.parquet": None,
+        "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-incidents/0/car_incidents.parquet": None,
+        "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-bike-parking-places/0/bike_parking_places.parquet": None,
+        "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-car-parkings/0/car_parkings.parquet": None,
+        "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-bus-stops-tper/0/tper_bus_stops.parquet": None,
+        "s3://datalake/projects/mobility-data/artifacts/mobility-data-pipeline/download-train-stops-tper/0/tper_train_stops.parquet": None,
     }
     
     base_folder = './data'

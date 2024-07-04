@@ -28,7 +28,20 @@ def pipeline(query: str, name: str):
 
     step9 = project.run_function("download-city30", outputs=["city_30"])
 
-    project.run_function("share", params={"bucket": "dataspace", "path":"mobility-data"})
-            .after(step1, step2, step3, step4, step5, step6, step7, step8, step9)
+    step10 = project.run_function("download_charging_stations", outputs=["charging_stations"])
+    
+    step11 = project.run_function("download_bike_path", outputs=["bike_path"])
+    
+    step12 = project.run_function("download_incidents", outputs=["car_incidents"])
+    
+    step13 = project.run_function("download_bike_parking_places", outputs=["bike_parking_places"])
+    
+    step14 = project.run_function("download_car_parkings", outputs=["car_parkings"])
+    
+    step15 = project.run_function("download_bus_stops_tper", outputs=["tper_bus_stops"])
+    
+    step16 = project.run_function("download_train_stops_tper", outputs=["tper_train_stops"])
+
+    project.run_function("share", params={"bucket": "dataspace", "path":"mobility-data"}).after(step1, step2, step3, step4, step5, step6, step7, step8, step9, step10, step11, step12, step13, step14, step15, step15, step16)
     
     
