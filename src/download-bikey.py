@@ -12,10 +12,10 @@ s3_path = "mobility-data"
 path_latest = "latest"
 
 def s3_store(s3_client, local_file, fname, year, latest):
-    s3_client.upload_file(local_file, s3_bucket, s3_path + '/bike-flow/' + path_latest + '/' + fname,
+    s3_client.upload_file(local_file, s3_bucket, s3_path + '/bike-flow/' + str(year) + '/' + fname,
                           ExtraArgs={'ContentType':'application/octet-stream'})
     if latest:
-        s3_client.upload_file(local_file, s3_bucket, s3_path + '/bike-flow/' + str(year) + '/' + fname,
+        s3_client.upload_file(local_file, s3_bucket, s3_path + '/bike-flow/' + path_latest + '/' + fname,
                           ExtraArgs={'ContentType':'application/octet-stream'})
         
         
