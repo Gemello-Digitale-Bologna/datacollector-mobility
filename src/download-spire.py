@@ -92,15 +92,18 @@ def process_file(context, service, item_id, item_name, date_extractor):
     f = open(f"myfile", "r")
     sensor = None
     entries = []
+    count = 0
     for x in f:
         if x.startswith('Section'):
             sensor = x.split('Section ')[1].strip()
+            count = 0
         else:
             arr = x.split('\t')
+            lc = 0
             for i in range(len(arr)):
                 if arr[i].strip() != '':
                     d = data.strftime("%Y-%m-%d")
-                    t = datetime.time(hour = i // 12, minute = i % 12 * 5).strftime("%H:%M")
+                    t = datetime.time(hour = (count + i) // 12, minute = i % 12 * 5).strftime("%H:%M")
                     entries.append({
                         'sensor_id': sensor,
                         'date': d,
@@ -108,6 +111,8 @@ def process_file(context, service, item_id, item_name, date_extractor):
                         'start': d + ' ' + t,
                         'value': int(int(arr[i]) / 12)
                     })
+                    lc += 1
+            count += lc
 
     df = pd.DataFrame(entries)
     fname = data.strftime("%Y-%m")
