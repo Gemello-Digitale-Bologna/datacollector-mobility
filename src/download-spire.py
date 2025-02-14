@@ -1,3 +1,4 @@
+
 import os
 
 from google.auth.transport.requests import Request
@@ -6,7 +7,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
-import mlrun
+
 import json
 import boto3
 
@@ -16,33 +17,30 @@ import datetime
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
-
-def getGService(context):
+def getGService(project, token_uri):
     creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    
-    token_info_var = context.get_secret('GOOGLE_TOKEN') or os.environ.get('GOOGLE_TOKEN')
-
-    if token_info_var is not None:
-        token_info = json.loads(token_info_var)
-        creds = Credentials.from_authorized_user_info(token_info, SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-    else:
-        raise Exception("No valid credentials")
-
+    token = token_uri.as_file()
     try:
+        token_info = json.load(open(token))
+        creds = Credentials.from_authorized_user_info(token_info, SCOPES)
         service = build("drive", "v3", credentials=creds)
-
     except HttpError as error:
-        # TODO(developer) - Handle errors from drive API.
-        context.logger.error(f"An error occurred: {error}")
+        print(f"An error occurred: {error}")
 
     return service
+
+def upload_file(s3, bucket: str, path: str, local_path: str, item_name: str):
+    """
+    Uploads specified data items to a shared S3 bucket and folder.
+    Requires the environment variables for S3 endpoint and credentials (S3_ENDPOINT_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY).
+    args:
+        bucket: The name of the bucket
+        path: The path within the bucket
+    """
+
+    name = path + '/' + item_name
+    s3.upload_file(local_path, bucket, name, ExtraArgs={'ContentType': 'application/octet-stream'})
+
 
 def extract_date_flussi(item_name):
     try:
@@ -61,21 +59,8 @@ def extract_date_accuracy(item_name):
             return datetime.datetime.strptime(item_name, 'accur%Y%m%d.txt')
         except Exception as e2:
             return None
-
-        
-def upload_file(s3, bucket: str, path: str, local_path: str, item_name: str):
-    """
-    Uploads specified data items to a shared S3 bucket and folder.
-    Requires the environment variables for S3 endpoint and credentials (S3_ENDPOINT_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY).
-    args:
-        bucket: The name of the bucket
-        path: The path within the bucket
-    """
-
-    name = path + '/' + item_name
-    s3.upload_file(local_path, bucket, name, ExtraArgs={'ContentType': 'application/octet-stream'})
-
-def process_file(context, service, item_id, item_name, date_extractor):
+       
+def process_file(service, item_id, item_name, date_extractor):
     r = service.files().get_media(fileId=item_id)
     local_path = 'myfile'
     with open(local_path, "wb") as fh:
@@ -86,7 +71,7 @@ def process_file(context, service, item_id, item_name, date_extractor):
 
     data = date_extractor(item_name)
     if data == None:
-        context.logger.error(f"Error: unknown file : {item_name}")
+        print(f"Error: unknown file : {item_name}")
         return
     
     f = open(f"myfile", "r")
@@ -123,13 +108,13 @@ def process_file(context, service, item_id, item_name, date_extractor):
         rdf = pd.concat([rdf, df])
         rdf.to_parquet(f"data/{fname}.parquet")
     
-def process_folder(context, service, folder, date_extractor):
+def process_folder(service, folder, date_extractor):
     """Downloads recursively all content from a specific year folder on Google Drive."""
     files = service.files()
     request = files.list(q=f"'{folder['id']}' in parents", 
                          supportsAllDrives=True, includeItemsFromAllDrives=True, 
                          fields="nextPageToken, files(id, name, mimeType)")
-    context.logger.info(f"folder {str(folder['name'])}")
+    print(f"folder {str(folder['name'])}")
     while request is not None:
         results = request.execute()
         
@@ -141,15 +126,15 @@ def process_folder(context, service, folder, date_extractor):
 
             # If it's a folder, recursively download its content as it is month folder
             if item_type == "application/vnd.google-apps.folder":
-                context.logger.info(f"Downloading folder {item_name}...")
-                process_folder(context, service, item, date_extractor)
+                print(f"Downloading folder {item_name}...")
+                process_folder(service, item, date_extractor)
             else:
-                # context.logger.info(f"Downloading file {item_name}...")
-                process_file(context, service, item_id, item_name, date_extractor)
+                print(f"Downloading file {item_name}...")
+                process_file(service, item_id, item_name, date_extractor)
         request = files.list_next(request, results)
 
-def process_all(context, query: str, s3, bucket: str, destination_path: str, date_extractor):
-    service = getGService(context)
+def process_all(project, token_uri, query: str, s3, bucket: str, destination_path: str, date_extractor):
+    service = getGService(project, token_uri)
     results = (service.files()
                .list(q=query, pageSize=1, fields="files(id, name, mimeType)", supportsAllDrives=True, includeItemsFromAllDrives=True)
                .execute())
@@ -167,7 +152,7 @@ def process_all(context, query: str, s3, bucket: str, destination_path: str, dat
                 # if year["name"] == "2024":
                 #     continue
                     
-                process_folder(context, service, year, date_extractor)
+                process_folder(service, year, date_extractor)
                 rdf = pd.DataFrame()
                 for i in range(1, 13):
                     mf = datetime.date(int(year["name"]), i, 1).strftime("%Y-%m")
@@ -179,9 +164,9 @@ def process_all(context, query: str, s3, bucket: str, destination_path: str, dat
                     upload_file(s3, bucket, destination_path + "/latest", f"data/{year['name']}.parquet", "trafic-spire.parquet")
                     
             request = files.list_next(request, results)
-            
-@mlrun.handler()
-def get_spire(context):
+
+def get_spire(project, token_uri, bucket):
+    
     base_folder = './data'
         
     if not os.path.exists(base_folder):
@@ -193,10 +178,10 @@ def get_spire(context):
                 aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
 
 
-    process_all(context, "mimeType='application/vnd.google-apps.folder' and name='Flussi spire'", s3, "dataspace", "mobility-data/trafic-spire", extract_date_flussi)
+    process_all(project, token_uri, "mimeType='application/vnd.google-apps.folder' and name='Flussi spire'", s3, bucket, "mobility-data/trafic-spire", extract_date_flussi)
 
-@mlrun.handler()
-def get_spire_accur(context):
+
+def get_spire_accur(project, token_uri, bucket):
     base_folder = './data'
         
     if not os.path.exists(base_folder):
@@ -208,4 +193,4 @@ def get_spire_accur(context):
                 aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
 
 
-    process_all(context, "mimeType='application/vnd.google-apps.folder' and name='Diagnostica'", s3, "dataspace", "mobility-data/trafic-spire-accur", extract_date_accuracy)
+    process_all(project, token_uri, "mimeType='application/vnd.google-apps.folder' and name='Diagnostica'", s3, bucket, "mobility-data/trafic-spire-accur", extract_date_accuracy)
