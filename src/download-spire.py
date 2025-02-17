@@ -165,7 +165,7 @@ def process_all(project, token_uri, query: str, s3, bucket: str, destination_pat
                     
             request = files.list_next(request, results)
 
-def get_spire(project, token_uri, bucket):
+def get_spire(project, bucket):
     
     base_folder = './data'
         
@@ -182,7 +182,7 @@ def get_spire(project, token_uri, bucket):
     process_all(project, token_uri, "mimeType='application/vnd.google-apps.folder' and name='Flussi spire'", s3, bucket, "mobility-data/trafic-spire", extract_date_flussi)
 
 
-def get_spire_accur(project, token_uri, bucket):
+def get_spire_accur(project, bucket):
     base_folder = './data'
         
     if not os.path.exists(base_folder):
