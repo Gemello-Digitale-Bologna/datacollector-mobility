@@ -19,9 +19,9 @@ SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
 def getGService(project, token_uri):
     creds = None
-    token = token_uri.as_file()
+    token = token_uri.read_secret_value()
     try:
-        token_info = json.load(open(token))
+        token_info = json.loads(token)
         creds = Credentials.from_authorized_user_info(token_info, SCOPES)
         service = build("drive", "v3", credentials=creds)
     except HttpError as error:
@@ -177,6 +177,7 @@ def get_spire(project, token_uri, bucket):
                 aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
                 aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
 
+    token_uri = project.get_secret('token')
 
     process_all(project, token_uri, "mimeType='application/vnd.google-apps.folder' and name='Flussi spire'", s3, bucket, "mobility-data/trafic-spire", extract_date_flussi)
 
@@ -192,5 +193,6 @@ def get_spire_accur(project, token_uri, bucket):
                 aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
                 aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
 
+    token_uri = project.get_secret('token')
 
     process_all(project, token_uri, "mimeType='application/vnd.google-apps.folder' and name='Diagnostica'", s3, bucket, "mobility-data/trafic-spire-accur", extract_date_accuracy)
