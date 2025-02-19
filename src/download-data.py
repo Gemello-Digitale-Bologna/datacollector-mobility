@@ -1,4 +1,3 @@
-import mlrun
 import pickle
 import osmnx as ox
 import os
@@ -18,8 +17,7 @@ import json
 
 base_folder = './data'
 
-@mlrun.handler()
-def download_dem(context, query: str):
+def download_dem(project, query: str):
     """
     Download the DEM (digital elevation model) data for the city/region involved.
     args:
@@ -74,8 +72,9 @@ def download_dem(context, query: str):
         with open(dem_path, 'wb') as out_file:
             out_file.write(response.content)
         
-        dem_content = open(dem_path, 'rb').read()
-        context.log_artifact("dem_model", body=response.content, format="tif", db_key="dem_model")
+        # dem_content = open(dem_path, 'rb').read()
+        project.log_artifact(name="dem_model", kind="artifact", source=dem_path)
+        # context.log_artifact("dem_model", body=response.content, format="tif", db_key="dem_model")
         # return response.content
     else:
         print("The response is not a TIFF file.")
@@ -91,12 +90,11 @@ def fetch_building_data(query):
     print(f"Fetching building data for {query}...")
     # Use features_from_place instead of geometries_from_place
     buildings = ox.features_from_place(query, tags={'building': True})
-    buildings.drop(columns=["nodes"], inplace=True)
+    buildings.drop(columns=["nodes"], inplace=True, errors='ignore')
     print(f"Number of buildings fetched: {len(buildings)}")
     return buildings            
 
-@mlrun.handler()
-def download_osm(context, query: str):    
+def download_osm(project, query: str):    
     """
     Downloads data from OpenStreetMap
     args:
@@ -129,20 +127,13 @@ def download_osm(context, query: str):
     buildings = fetch_building_data(query)
     
     gdf_nodes.to_parquet('./data/nodes.parquet')
-    with open('./data/nodes.parquet', 'rb') as in_file:
-        content = in_file.read()
-        context.log_artifact("osm_nodes", body=content, format="parquet", db_key="osm_nodes")
+    project.log_artifact(name="osm_nodes", kind="artifact", source='./data/nodes.parquet')
 
     gdf_edges.to_parquet('./data/edges.parquet')
-    with open('./data/edges.parquet', 'rb') as in_file:
-        content = in_file.read()
-        context.log_artifact("osm_edges", body=content, format="parquet", db_key="osm_edges")
+    project.log_artifact(name="osm_edges", kind="artifact", source='./data/edges.parquet')
 
     buildings.to_parquet('./data/buildings.parquet')
-    with open('./data/buildings.parquet', 'rb') as in_file:
-        content = in_file.read()
-        context.log_artifact("osm_buildings", body=content, format="parquet", db_key="osm_buildings")
-
+    project.log_artifact(name="osm_buildings", kind="artifact", source='./data/buildings.parquet')
 
 
 def calculate_building_distances(gdf_buildings):
@@ -281,8 +272,7 @@ def calc_slope(gdf_edges, dem_path):
     gdf_edges['slope_class'] = gdf_edges['slope'].apply(lambda slope: slope_class(slope))
     gdf_edges['slope_class_label'] = gdf_edges['slope'].apply(lambda slope: slope_class_label(slope))
 
-@mlrun.handler()
-def merge_osm_dem(context, nodes: mlrun.DataItem, edges: mlrun.DataItem, buildings: mlrun.DataItem, dem: mlrun.DataItem):    
+def merge_osm_dem(project, nodes, edges, buildings, dem):    
     """
     Merge OSM graph with elevation data
     args:
@@ -366,11 +356,14 @@ def merge_osm_dem(context, nodes: mlrun.DataItem, edges: mlrun.DataItem, buildin
     file_path = os.path.join(base_folder, 'slope_map.html')
     map_osm.save(file_path)
     map_content = open(file_path, 'r').read()
-    context.log_artifact('slope_map', body=map_content, format="html", db_key="slope_map")
+    # context.log_artifact('slope_map', body=map_content, format="html", db_key="slope_map")
+    project.log_artifact(name="slope_map", kind="artifact", source=file_path)
+    
 
     gdf_edges.to_parquet('./data/edges.parquet')
-    with open('./data/edges.parquet', 'rb') as in_file:
-        content = in_file.read()
-        context.log_artifact("osm_edges_elevation", body=content, format="parquet", db_key="osm_edges_elevation")
+    project.log_artifact(name="osm_edges_elevation", kind="artifact", source='./data/edges.parquet')
+    # with open('./data/edges.parquet', 'rb') as in_file:
+    #     content = in_file.read()
+    #     context.log_artifact("osm_edges_elevation", body=content, format="parquet", db_key="osm_edges_elevation")
 
     # return json.loads(gdf_edges.to_json()) 
