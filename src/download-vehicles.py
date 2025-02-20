@@ -26,8 +26,6 @@ def write_year(project, s3_bucket, s3_client, year, name, parquet_file, latest):
     print(f"write vehicles data year {year}")
     
     
-    
-# @mlrun.handler()
 def download_vehicles_by_year(project, bucket, year):
     s3 = boto3.client('s3',
                     endpoint_url=os.environ.get('S3_ENDPOINT_URL'),
@@ -51,5 +49,5 @@ def download_vehicles_by_year(project, bucket, year):
         with open(parquet_file, 'bw') as out_file:
             out_file.write(response.content)
     
-        write_year(project, bucket, s3, year, name, parquet_file, False)
+    write_year(project, bucket, s3, year, name, parquet_file, False)
 
