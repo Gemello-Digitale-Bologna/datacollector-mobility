@@ -7,7 +7,6 @@ spec:
   - url: src/download-data.py
     name: download-dem
     kind: job
-    image: mlrun/mlrun
     handler: download_dem
     requirements:
     - rasterio
@@ -21,7 +20,6 @@ spec:
   - url: src/download-data.py
     name: download-osm
     kind: job
-    image: mlrun/mlrun
     handler: download_osm
     requirements:
     - rasterio
@@ -35,7 +33,6 @@ spec:
   - url: src/download-data.py
     name: merge-osm-dem
     kind: job
-    image: mlrun/mlrun
     handler: merge_osm_dem
     requirements:
     - rasterio
@@ -46,111 +43,91 @@ spec:
     - h3
     - folium
     - pandas==1.3.5
-  - url: src/share-data.py
-    name: share
-    kind: job
-    image: mlrun/mlrun
-    handler: share_files
   - url: src/download-open-data.py
     name: download-road-areas
     kind: job
-    image: mlrun/mlrun
     handler: download_road_areas
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-road-edges
     kind: job
-    image: mlrun/mlrun
     handler: download_road_edges
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-road-nodes
     kind: job
-    image: mlrun/mlrun
     handler: download_road_nodes
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-curves
     kind: job
-    image: mlrun/mlrun
     handler: download_curves
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-sidewalks
     kind: job
-    image: mlrun/mlrun
     handler: download_sidewalks
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-city30
     kind: job
-    image: mlrun/mlrun
     handler: download_city_30
     requirements:
     - geopandas==0.13.2
   - url: src/download-spire.py
     name: download-traffic-spire
     kind: job
-    image: mlrun/mlrun
     handler: get_spire
   - url: src/download-open-data.py
     name: download-charging-stations
     kind: job
-    image: mlrun/mlrun
     handler: download_charging_stations
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-bike-path
     kind: job
-    image: mlrun/mlrun
     handler: download_bike_path
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-incidents
     kind: job
-    image: mlrun/mlrun
     handler: download_incidents
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-bike-parking-places
     kind: job
-    image: mlrun/mlrun
     handler: download_bike_parking_places
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-car-parkings
     kind: job
-    image: mlrun/mlrun
     handler: download_car_parkings
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-bus-stops-tper
     kind: job
-    image: mlrun/mlrun
     handler: download_bus_stops_tper
     requirements:
     - geopandas==0.13.2
   - url: src/download-open-data.py
     name: download-train-stops-tper
     kind: job
-    image: mlrun/mlrun
     handler: download_train_stops_tper
     requirements:
     - geopandas==0.13.2
   - url: src/download-spire.py
     name: download-traffic-spire-accuracy
     kind: job
-    image: mlrun/mlrun
     handler: get_spire_accur
   workflows:
   - path: ./src/mobility-data-pipeline.py
