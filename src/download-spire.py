@@ -1,4 +1,3 @@
-
 import os
 
 from google.auth.transport.requests import Request
@@ -175,7 +174,8 @@ def get_spire(project, bucket):
     s3 = boto3.client('s3',
                 endpoint_url=os.environ.get('S3_ENDPOINT_URL'),
                 aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
-                aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
+                aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
+                aws_session_token=os.environ.get('AWS_SESSION_TOKEN'))
 
     token_uri = project.get_secret('token')
 
@@ -191,7 +191,8 @@ def get_spire_accur(project, bucket):
     s3 = boto3.client('s3',
                 endpoint_url=os.environ.get('S3_ENDPOINT_URL'),
                 aws_access_key_id=os.environ.get('AWS_ACCESS_KEY_ID'),
-                aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'))
+                aws_secret_access_key=os.environ.get('AWS_SECRET_ACCESS_KEY'),
+                aws_session_token=os.environ.get('AWS_SESSION_TOKEN'))
 
     token_uri = project.get_secret('token')
 
